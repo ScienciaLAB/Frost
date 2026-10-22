@@ -13,10 +13,10 @@ jobs:
       - uses: actions/checkout@v5
       - name: Show Xcode version
         run: xcodebuild -version
-      # Ad-hoc signed (no team). The hardened runtime is disabled because its
-      # library validation rejects Sparkle.framework, which keeps the Sparkle
-      # project's own signature, and Ice aborts at launch. It's only needed
-      # for notarization, which ad-hoc builds can't get anyway.
+      # Ad-hoc signed (no team). The hardened runtime is disabled because, with
+      # an ad-hoc signature, its library validation rejects Sparkle.framework on
+      # a normal Mac and Ice aborts at launch. It's only needed for
+      # notarization, which ad-hoc builds can't get anyway.
       - name: Build Ice.app
         run: |
           xcodebuild build \
@@ -46,14 +46,13 @@ jobs:
         run: |
           app=build/Build/Products/Release/Ice.app
           # Runners have SIP disabled, so library validation isn't enforced here
-          # and a launch alone can't catch a signature mismatch. Check it directly.
-          app_info=$(codesign -dv "$app" 2>&1)
-          sparkle_team=$(codesign -dv "$app/Contents/Frameworks/Sparkle.framework" 2>&1 | sed -n 's/^TeamIdentifier=//p')
-          app_team=$(sed -n 's/^TeamIdentifier=//p' <<<"$app_info")
-          echo "$app_info" | grep -E "flags|TeamIdentifier"
-          echo "Sparkle TeamIdentifier=$sparkle_team"
-          if grep -q "runtime" <<<"$app_info" && [ "$app_team" != "$sparkle_team" ]; then
-            echo "::error::Hardened runtime is on but Sparkle's Team ID ($sparkle_team) differs from the app's ($app_team); dyld will refuse to load it"
+          # and a launch alone can't catch it. Check the signature directly: an
+          # ad-hoc build with the hardened runtime aborts at launch on a normal
+          # Mac because dyld refuses to load Sparkle.framework.
+          flags=$(codesign -dv "$app" 2>&1 | grep -E "flags")
+          echo "$flags"
+          if grep -q "adhoc" <<<"$flags" && grep -q "runtime" <<<"$flags"; then
+            echo "::error::Ad-hoc signed with the hardened runtime; dyld will refuse to load Sparkle.framework"
             exit 1
           fi
           "$app/Contents/MacOS/Ice" > launch.log 2>&1 &
