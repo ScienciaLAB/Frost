@@ -1,8 +1,11 @@
 name: Release
-# Push a tag like v0.2.0 (matching MARKETING_VERSION) to publish a release.
+# Publishes the version in MARKETING_VERSION. Either run this workflow from
+# the Actions tab on main (it creates the v<version> tag), or push a matching
+# tag such as v0.2.0.
 on:
   push:
     tags: [ "v*" ]
+  workflow_dispatch:
 permissions:
   contents: write
   actions: write
@@ -24,10 +27,17 @@ jobs:
           build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$plist")
           min_os=$(/usr/libexec/PlistBuddy -c "Print :LSMinimumSystemVersion" "$plist")
           public_key=$(/usr/libexec/PlistBuddy -c "Print :SUPublicEDKey" "$plist")
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME doesn't match the app version $version (MARKETING_VERSION)"
+          tag="v$version"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            if [ "$tag" != "$GITHUB_REF_NAME" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME doesn't match the app version $version (MARKETING_VERSION)"
+              exit 1
+            fi
+          elif gh release view "$tag" > /dev/null 2>&1; then
+            echo "::error::Release $tag already exists; bump MARKETING_VERSION and CURRENT_PROJECT_VERSION first"
             exit 1
           fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
           {
             echo "version=$version"
             echo "build=$build"
@@ -61,10 +71,11 @@ jobs:
           echo "signed=$signed" >> "$GITHUB_OUTPUT"
       - name: Create GitHub release
         run: |
-          gh release create "$GITHUB_REF_NAME" Frost.zip \
+          # Creates the tag on the built commit when it doesn't exist yet.
+          gh release create "$TAG" Frost.zip \
+            --target "$GITHUB_SHA" \
             --title "Frost ${{ steps.version.outputs.version }}" \
-            --generate-notes \
-            --verify-tag
+            --generate-notes
       - name: Add release to the update feed
         run: |
           repo_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
@@ -74,8 +85,8 @@ jobs:
             "${{ steps.version.outputs.version }}" \
             "${{ steps.version.outputs.build }}" \
             "${{ steps.version.outputs.min_os }}" \
-            "$repo_url/releases/download/$GITHUB_REF_NAME/Frost.zip" \
-            "$repo_url/releases/tag/$GITHUB_REF_NAME" \
+            "$repo_url/releases/download/$TAG/Frost.zip" \
+            "$repo_url/releases/tag/$TAG" \
             '${{ steps.sign.outputs.signed }}'
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
