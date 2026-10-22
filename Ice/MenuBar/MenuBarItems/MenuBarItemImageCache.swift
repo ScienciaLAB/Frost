@@ -208,9 +208,11 @@ final class MenuBarItemImageCache: ObservableObject {
             }
             // Capture can fail on macOS 26 (e.g. for some hidden items). Rather than
             // excluding the item, which fails the whole section, show its app icon.
-            if #available(macOS 26.0, *),
-               let icon = item.sourceApplication?.icon,
-               let image = CapturedImage.fallback(icon: icon, scale: scale) {
+            if
+                #available(macOS 26.0, *),
+                let icon = item.sourceApplication?.icon,
+                let image = CapturedImage.fallback(icon: icon, scale: scale)
+            {
                 result.images[item.tag] = image
                 continue
             }
