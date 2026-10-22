@@ -96,3 +96,29 @@ jobs:
       # but workflow_dispatch does, so start the site deployment explicitly.
       - name: Deploy website
         run: gh workflow run pages.yml --ref main
+      # Needs TAP_GITHUB_TOKEN: a fine-grained token with Contents read and
+      # write access to ScienciaLAB/homebrew-tap.
+      - name: Update Homebrew cask
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if [ -z "$TAP_GITHUB_TOKEN" ]; then
+            echo "::warning::TAP_GITHUB_TOKEN is not set, so the Homebrew cask wasn't updated"
+            exit 0
+          fi
+          sha=$(shasum -a 256 Frost.zip | cut -d ' ' -f 1)
+          git clone --depth 1 "https://x-access-token:$TAP_GITHUB_TOKEN@github.com/ScienciaLAB/homebrew-tap.git" tap
+          cd tap
+          sed -i '' -E \
+            -e "s/^  version \".*\"/  version \"$VERSION\"/" \
+            -e "s/^  sha256 \".*\"/  sha256 \"$sha\"/" \
+            Casks/frost.rb
+          if git diff --quiet; then
+            echo "Cask is already at $VERSION"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Update frost to $VERSION"
+          git push origin HEAD:main
