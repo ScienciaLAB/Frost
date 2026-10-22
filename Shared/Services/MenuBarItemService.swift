@@ -7,7 +7,7 @@ import Foundation
 import Security
 
 enum MenuBarItemService {
-    static let name = "com.jordanbaird.Ice.MenuBarItemService"
+    static let name = "com.sciencialab.Frost.MenuBarItemService"
 
     /// Returns the Team Identifier of the currently running process, or
     /// `nil` if the binary is unsigned, ad-hoc signed, or the team

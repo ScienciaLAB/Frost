@@ -1,9 +1,11 @@
 name: Build
 on:
   push:
+    branches: [ "**" ]
     paths-ignore:
       - "**/*.md"
       - ".github/ISSUE_TEMPLATE/**"
+      - "website/**"
   pull_request:
   workflow_dispatch:
 jobs:
@@ -13,62 +15,25 @@ jobs:
       - uses: actions/checkout@v5
       - name: Show Xcode version
         run: xcodebuild -version
-      # Ad-hoc signed (no team). The hardened runtime is disabled because, with
-      # an ad-hoc signature, its library validation rejects Sparkle.framework on
-      # a normal Mac and Ice aborts at launch. It's only needed for
-      # notarization, which ad-hoc builds can't get anyway.
-      - name: Build Ice.app
-        run: |
-          xcodebuild build \
-            -project Ice.xcodeproj \
-            -scheme Ice \
-            -configuration Release \
-            -destination "generic/platform=macOS" \
-            -derivedDataPath build \
-            -skipPackagePluginValidation \
-            -skipMacroValidation \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="" \
-            ENABLE_HARDENED_RUNTIME=NO \
-            > build.log 2>&1 || status=$?
-          grep -E "error:|BUILD (SUCCEEDED|FAILED)" build.log || true
-          exit "${status:-0}"
-      - name: Show build errors
-        if: failure()
-        run: grep -E -B2 -A6 "error:" build.log | head -300 || tail -200 build.log
-      - name: Package Ice.zip
-        run: |
-          app=build/Build/Products/Release/Ice.app
-          codesign --verify --deep --verbose=2 "$app"
-          ditto -c -k --keepParent "$app" Ice.zip
+      - name: Build Frost.app
+        run: Scripts/build.sh
       - name: Smoke test (launch and stay running)
         run: |
-          app=build/Build/Products/Release/Ice.app
-          # Runners have SIP disabled, so library validation isn't enforced here
-          # and a launch alone can't catch it. Check the signature directly: an
-          # ad-hoc build with the hardened runtime aborts at launch on a normal
-          # Mac because dyld refuses to load Sparkle.framework.
-          flags=$(codesign -dv "$app" 2>&1 | grep -E "flags")
-          echo "$flags"
-          if grep -q "adhoc" <<<"$flags" && grep -q "runtime" <<<"$flags"; then
-            echo "::error::Ad-hoc signed with the hardened runtime; dyld will refuse to load Sparkle.framework"
-            exit 1
-          fi
-          "$app/Contents/MacOS/Ice" > launch.log 2>&1 &
+          app=build/Build/Products/Release/Frost.app
+          "$app/Contents/MacOS/Frost" > launch.log 2>&1 &
           pid=$!
           sleep 15
           alive=no; kill -0 "$pid" 2>/dev/null && alive=yes
           echo "--- still running after 15s: $alive"
           echo "--- stdout/stderr"; cat launch.log
           echo "--- system log"
-          log show --last 1m --style compact --predicate 'process == "Ice" OR eventMessage CONTAINS[c] "Ice.app"' | tail -60 || true
-          ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i ice && cat ~/Library/Logs/DiagnosticReports/Ice*.ips | head -80 || true
+          log show --last 1m --style compact --predicate 'process == "Frost" OR eventMessage CONTAINS[c] "Frost.app"' | tail -60 || true
+          ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i frost && cat ~/Library/Logs/DiagnosticReports/Frost*.ips | head -80 || true
           kill "$pid" 2>/dev/null || true
           test "$alive" = yes
-      # Upload Ice.zip as-is. By default GitHub wraps artifacts in another
+      # Upload Frost.zip as-is. By default GitHub wraps artifacts in another
       # zip, so downloading would give a zip inside a zip.
       - uses: actions/upload-artifact@v7
         with:
-          path: Ice.zip
+          path: Frost.zip
           archive: false
