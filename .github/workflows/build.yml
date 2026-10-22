@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Show Xcode version
         run: xcodebuild -version
       - name: Build Ice.app
@@ -26,8 +26,9 @@ jobs:
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="" \
-            | tee build.log | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)" || true
-          test "${PIPESTATUS[0]}" -eq 0
+            > build.log 2>&1 || status=$?
+          grep -E "error:|BUILD (SUCCEEDED|FAILED)" build.log || true
+          exit "${status:-0}"
       - name: Show build errors
         if: failure()
         run: grep -E -B2 -A6 "error:" build.log | head -300 || tail -200 build.log
@@ -36,7 +37,7 @@ jobs:
           app=build/Build/Products/Release/Ice.app
           codesign --verify --deep --verbose=2 "$app"
           ditto -c -k --keepParent "$app" Ice.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: Ice
           path: Ice.zip
