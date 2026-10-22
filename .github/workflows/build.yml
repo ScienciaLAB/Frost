@@ -13,6 +13,10 @@ jobs:
       - uses: actions/checkout@v5
       - name: Show Xcode version
         run: xcodebuild -version
+      # Ad-hoc signed (no team). The hardened runtime is disabled because its
+      # library validation rejects Sparkle.framework, which keeps the Sparkle
+      # project's own signature, and Ice aborts at launch. It's only needed
+      # for notarization, which ad-hoc builds can't get anyway.
       - name: Build Ice.app
         run: |
           xcodebuild build \
@@ -26,6 +30,7 @@ jobs:
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="" \
+            ENABLE_HARDENED_RUNTIME=NO \
             > build.log 2>&1 || status=$?
           grep -E "error:|BUILD (SUCCEEDED|FAILED)" build.log || true
           exit "${status:-0}"
