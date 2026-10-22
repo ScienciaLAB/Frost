@@ -31,6 +31,8 @@ tccutil reset Accessibility com.sciencialab.Frost
 tccutil reset ScreenCapture com.sciencialab.Frost
 ```
 
+If you used Ice before, Frost imports your Ice settings the first time it launches.
+
 Frost updates itself through [Sparkle](https://sparkle-project.org).
 
 ## Building from source

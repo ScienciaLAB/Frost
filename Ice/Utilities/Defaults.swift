@@ -173,6 +173,7 @@ extension Defaults {
         case hasMigrated0_11_10 = "hasMigrated0_11_10"
         case hasMigrated0_11_13 = "hasMigrated0_11_13"
         case hasMigrated0_11_13_1 = "hasMigrated0_11_13_1"
+        case hasImportedIceSettings = "hasImportedIceSettings"
 
         // MARK: Deprecated (Appearance Settings)
         case menuBarHasBorder = "MenuBarHasBorder"
