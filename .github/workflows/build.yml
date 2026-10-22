@@ -37,6 +37,21 @@ jobs:
           app=build/Build/Products/Release/Ice.app
           codesign --verify --deep --verbose=2 "$app"
           ditto -c -k --keepParent "$app" Ice.zip
+      - name: Smoke test (launch and stay running)
+        run: |
+          app=build/Build/Products/Release/Ice.app
+          codesign -dv --entitlements - "$app" 2>&1 | grep -E "flags|TeamIdentifier|Signature" || true
+          "$app/Contents/MacOS/Ice" > launch.log 2>&1 &
+          pid=$!
+          sleep 15
+          alive=no; kill -0 "$pid" 2>/dev/null && alive=yes
+          echo "--- still running after 15s: $alive"
+          echo "--- stdout/stderr"; cat launch.log
+          echo "--- system log"
+          log show --last 1m --style compact --predicate 'process == "Ice" OR eventMessage CONTAINS[c] "Ice.app"' | tail -60 || true
+          ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i ice && cat ~/Library/Logs/DiagnosticReports/Ice*.ips | head -80 || true
+          kill "$pid" 2>/dev/null || true
+          test "$alive" = yes
       # Upload Ice.zip as-is. By default GitHub wraps artifacts in another
       # zip, so downloading would give a zip inside a zip.
       - uses: actions/upload-artifact@v7
