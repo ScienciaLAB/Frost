@@ -7,6 +7,15 @@
         <language>en</language>
         <!-- releases -->
         <item>
+            <title>0.2.2</title>
+            <pubDate>Thu, 22 Oct 2026 15:12:31 GMT</pubDate>
+            <sparkle:version>1202</sparkle:version>
+            <sparkle:shortVersionString>0.2.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>https://github.com/ScienciaLAB/Frost/releases/tag/v0.2.2</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/ScienciaLAB/Frost/releases/download/v0.2.2/Frost.zip" sparkle:edSignature="bmmUp+8mU06SI9rBGgYiQAKQ1TNPvbAxRCvKUX79ZlMWzyXkKATr6jesFxgZYfr4khvmlPHgyXfpm8Avm/BiDw==" length="6161385" type="application/octet-stream"/>
+        </item>
+        <item>
             <title>0.2.1</title>
             <pubDate>Thu, 22 Oct 2026 12:59:01 GMT</pubDate>
             <sparkle:version>1201</sparkle:version>
