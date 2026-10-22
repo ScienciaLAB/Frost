@@ -33,6 +33,12 @@ tccutil reset ScreenCapture com.sciencialab.Frost
 
 If you used Ice before, Frost imports your Ice settings the first time it launches.
 
+Or install with [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask sciencialab/tap/frost
+```
+
 Frost updates itself through [Sparkle](https://sparkle-project.org).
 
 ## Building from source
@@ -48,7 +54,7 @@ Scripts/build.sh
 1. Set `MARKETING_VERSION` and increase `CURRENT_PROJECT_VERSION` (the build number Sparkle compares) in the project.
 2. Merge to `main`, then run the **Release** workflow on `main` from the Actions tab (it creates the `v<version>` tag), or push a matching tag such as `v0.2.0`.
 
-The [Release workflow](.github/workflows/release.yml) builds and signs `Frost.zip`, publishes the GitHub release, adds it to the update feed (`website/appcast.xml`), and redeploys the [website](https://sciencialab.github.io/Frost/). It needs the `SPARKLE_PRIVATE_KEY` repository secret, matching `SUPublicEDKey` in `Ice/Resources/Info.plist`.
+The [Release workflow](.github/workflows/release.yml) builds and signs `Frost.zip`, publishes the GitHub release, adds it to the update feed (`website/appcast.xml`), and redeploys the [website](https://sciencialab.github.io/Frost/). It needs the `SPARKLE_PRIVATE_KEY` repository secret, matching `SUPublicEDKey` in `Ice/Resources/Info.plist`. With the `TAP_GITHUB_TOKEN` secret (a fine-grained token with Contents read and write access to [ScienciaLAB/homebrew-tap](https://github.com/ScienciaLAB/homebrew-tap)), it also updates the Homebrew cask.
 
 ## Features/Roadmap
 
