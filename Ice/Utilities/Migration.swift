@@ -22,6 +22,9 @@ struct MigrationManager {
 extension MigrationManager {
     /// Performs all migrations.
     func migrateAll() {
+        // Import first, so the migrations below can update old Ice settings.
+        importIceSettings()
+
         var results = [MigrationResult]()
 
         do {
@@ -52,6 +55,56 @@ extension MigrationManager {
                 logger.error("Migration failed with error \(error, privacy: .public)")
             }
         }
+    }
+}
+
+// MARK: - Import Ice Settings
+
+extension MigrationManager {
+    /// The bundle identifier of Ice, the app that Frost is based on.
+    private static let iceBundleIdentifier = "com.jordanbaird.Ice"
+
+    /// Copies the user's settings from Ice the first time Frost launches.
+    ///
+    /// Frost has its own bundle identifier, so it doesn't see the settings
+    /// that Ice stored under `com.jordanbaird.Ice`. Settings that Frost
+    /// already has are never overwritten.
+    private func importIceSettings() {
+        guard !Defaults.bool(forKey: .hasImportedIceSettings) else {
+            return
+        }
+
+        // Every launch sets the migration flags, so their absence means
+        // this is Frost's first launch.
+        let isFirstLaunch = Defaults.object(forKey: .hasMigrated0_8_0) == nil
+        Defaults.set(true, forKey: .hasImportedIceSettings)
+
+        guard
+            isFirstLaunch,
+            Constants.bundleIdentifier != Self.iceBundleIdentifier,
+            let iceSettings = UserDefaults.standard.persistentDomain(forName: Self.iceBundleIdentifier)
+        else {
+            return
+        }
+
+        var count = 0
+        for (key, value) in iceSettings where shouldImportIceSetting(forKey: key) {
+            guard UserDefaults.standard.object(forKey: key) == nil else {
+                continue
+            }
+            UserDefaults.standard.set(value, forKey: key)
+            count += 1
+        }
+
+        logger.info("Imported \(count) settings from Ice")
+    }
+
+    /// Returns a Boolean value that indicates whether the Ice setting with
+    /// the given key should be imported.
+    private func shouldImportIceSetting(forKey key: String) -> Bool {
+        // Sparkle's update state belongs to Ice's update feed, and window
+        // frames belong to Ice's windows.
+        !key.hasPrefix("SU") && !key.hasPrefix("NSWindow Frame")
     }
 }
 

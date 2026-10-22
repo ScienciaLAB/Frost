@@ -168,7 +168,7 @@
           Frost isn't notarized by Apple yet, so macOS blocks it the first time. Clear the download flag in Terminal:
           <pre><code>xattr -dr com.apple.quarantine /Applications/Frost.app</code></pre>
         </li>
-        <li>Open Frost from Applications or Finder, then grant <strong>Accessibility</strong> and <strong>Screen &amp; System Audio Recording</strong> when asked. After granting Screen Recording, quit Frost and open it again.</li>
+        <li>Open Frost from Applications or Finder, then grant <strong>Accessibility</strong> and <strong>Screen &amp; System Audio Recording</strong> when asked. After granting Screen Recording, quit Frost and open it again. If you used Ice before, Frost imports your Ice settings on its first launch.</li>
       </ol>
       <p class="note">If Frost says permissions are missing even though they look enabled in System Settings, remove Frost from both permission lists (or run <code>tccutil reset Accessibility com.sciencialab.Frost</code> and <code>tccutil reset ScreenCapture com.sciencialab.Frost</code>), then open Frost and grant them again.</p>
     </div>
