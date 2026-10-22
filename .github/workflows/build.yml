@@ -1,0 +1,42 @@
+name: Build
+on:
+  push:
+    paths-ignore:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build Ice.app
+        run: |
+          xcodebuild build \
+            -project Ice.xcodeproj \
+            -scheme Ice \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            -derivedDataPath build \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="" \
+            | tee build.log | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)" || true
+          test "${PIPESTATUS[0]}" -eq 0
+      - name: Show build errors
+        if: failure()
+        run: grep -E -B2 -A6 "error:" build.log | head -300 || tail -200 build.log
+      - name: Package Ice.zip
+        run: |
+          app=build/Build/Products/Release/Ice.app
+          codesign --verify --deep --verbose=2 "$app"
+          ditto -c -k --keepParent "$app" Ice.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ice
+          path: Ice.zip
