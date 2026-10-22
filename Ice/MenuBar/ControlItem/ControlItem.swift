@@ -82,7 +82,6 @@ final class ControlItem {
                     let constraints = button.window?.contentView?.constraintsAffectingLayout(for: .horizontal),
                     let constraint = constraints.first(where: Predicates.controlItemConstraint(button: button))
                 {
-                    assert(constraints.filter(Predicates.controlItemConstraint(button: button)).count == 1)
                     self.constraint = constraint
                 } else {
                     self.constraint = nil
