@@ -37,7 +37,9 @@ jobs:
           app=build/Build/Products/Release/Ice.app
           codesign --verify --deep --verbose=2 "$app"
           ditto -c -k --keepParent "$app" Ice.zip
-      - uses: actions/upload-artifact@v5
+      # Upload Ice.zip as-is. By default GitHub wraps artifacts in another
+      # zip, so downloading would give a zip inside a zip.
+      - uses: actions/upload-artifact@v7
         with:
-          name: Ice
           path: Ice.zip
+          archive: false
