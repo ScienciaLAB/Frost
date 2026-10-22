@@ -44,7 +44,7 @@ Scripts/build.sh
 ## Releasing
 
 1. Set `MARKETING_VERSION` and increase `CURRENT_PROJECT_VERSION` (the build number Sparkle compares) in the project.
-2. Merge to `main`, then push a matching tag, e.g. `git tag v0.2.0 && git push origin v0.2.0`.
+2. Merge to `main`, then run the **Release** workflow on `main` from the Actions tab (it creates the `v<version>` tag), or push a matching tag such as `v0.2.0`.
 
 The [Release workflow](.github/workflows/release.yml) builds and signs `Frost.zip`, publishes the GitHub release, adds it to the update feed (`website/appcast.xml`), and redeploys the [website](https://sciencialab.github.io/Frost/). It needs the `SPARKLE_PRIVATE_KEY` repository secret, matching `SUPublicEDKey` in `Ice/Resources/Info.plist`.
 
