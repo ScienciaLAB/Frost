@@ -45,7 +45,17 @@ jobs:
       - name: Smoke test (launch and stay running)
         run: |
           app=build/Build/Products/Release/Ice.app
-          codesign -dv --entitlements - "$app" 2>&1 | grep -E "flags|TeamIdentifier|Signature" || true
+          # Runners have SIP disabled, so library validation isn't enforced here
+          # and a launch alone can't catch a signature mismatch. Check it directly.
+          app_info=$(codesign -dv "$app" 2>&1)
+          sparkle_team=$(codesign -dv "$app/Contents/Frameworks/Sparkle.framework" 2>&1 | sed -n 's/^TeamIdentifier=//p')
+          app_team=$(sed -n 's/^TeamIdentifier=//p' <<<"$app_info")
+          echo "$app_info" | grep -E "flags|TeamIdentifier"
+          echo "Sparkle TeamIdentifier=$sparkle_team"
+          if grep -q "runtime" <<<"$app_info" && [ "$app_team" != "$sparkle_team" ]; then
+            echo "::error::Hardened runtime is on but Sparkle's Team ID ($sparkle_team) differs from the app's ($app_team); dyld will refuse to load it"
+            exit 1
+          fi
           "$app/Contents/MacOS/Ice" > launch.log 2>&1 &
           pid=$!
           sleep 15
