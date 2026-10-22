@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
     <channel>
         <title>Frost</title>
-        <link>https://sciencialab.github.io/Ice/</link>
+        <link>https://sciencialab.github.io/Frost/</link>
         <description>Updates for Frost</description>
         <language>en</language>
         <!-- releases -->

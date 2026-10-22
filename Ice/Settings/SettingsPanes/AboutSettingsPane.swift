@@ -17,7 +17,7 @@ struct AboutSettingsPane: View {
 
     private var contributeURL: URL {
         // swiftlint:disable:next force_unwrapping
-        URL(string: "https://github.com/ScienciaLAB/Ice")!
+        URL(string: "https://github.com/ScienciaLAB/Frost")!
     }
 
     private var issuesURL: URL {

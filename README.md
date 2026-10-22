@@ -7,15 +7,15 @@ Frost is a powerful menu bar manager for macOS. It hides, shows, and rearranges 
 
 Frost continues [Ice](https://github.com/jordanbaird/Ice) by Jordan Baird, which is no longer maintained. It is built on Ice's unreleased macOS 26 branch plus community fixes that were never merged upstream.
 
-[![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/ScienciaLAB/Ice/releases/latest/download/Frost.zip)
+[![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/ScienciaLAB/Frost/releases/latest/download/Frost.zip)
 ![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat-square)
 ![Requirements](https://img.shields.io/badge/requirements-macOS%2014%2B-fa4e49?style=flat-square)
-[![Website](https://img.shields.io/badge/Website-015FBA?style=flat-square)](https://sciencialab.github.io/Ice/)
-[![License](https://img.shields.io/github/license/ScienciaLAB/Ice?style=flat-square)](LICENSE)
+[![Website](https://img.shields.io/badge/Website-015FBA?style=flat-square)](https://sciencialab.github.io/Frost/)
+[![License](https://img.shields.io/github/license/ScienciaLAB/Frost?style=flat-square)](LICENSE)
 
 ## Install
 
-1. Download [Frost.zip](https://github.com/ScienciaLAB/Ice/releases/latest/download/Frost.zip) from the [latest release](https://github.com/ScienciaLAB/Ice/releases/latest) and move `Frost.app` to your `Applications` folder.
+1. Download [Frost.zip](https://github.com/ScienciaLAB/Frost/releases/latest/download/Frost.zip) from the [latest release](https://github.com/ScienciaLAB/Frost/releases/latest) and move `Frost.app` to your `Applications` folder.
 2. Frost isn't notarized by Apple yet, so macOS blocks it the first time. Clear the download flag in Terminal:
 
    ```sh
@@ -46,7 +46,7 @@ Scripts/build.sh
 1. Set `MARKETING_VERSION` and increase `CURRENT_PROJECT_VERSION` (the build number Sparkle compares) in the project.
 2. Merge to `main`, then push a matching tag, e.g. `git tag v0.2.0 && git push origin v0.2.0`.
 
-The [Release workflow](.github/workflows/release.yml) builds and signs `Frost.zip`, publishes the GitHub release, adds it to the update feed (`website/appcast.xml`), and redeploys the [website](https://sciencialab.github.io/Ice/). It needs the `SPARKLE_PRIVATE_KEY` repository secret, matching `SUPublicEDKey` in `Ice/Resources/Info.plist`.
+The [Release workflow](.github/workflows/release.yml) builds and signs `Frost.zip`, publishes the GitHub release, adds it to the update feed (`website/appcast.xml`), and redeploys the [website](https://sciencialab.github.io/Frost/). It needs the `SPARKLE_PRIVATE_KEY` repository secret, matching `SUPublicEDKey` in `Ice/Resources/Info.plist`.
 
 ## Features/Roadmap
 

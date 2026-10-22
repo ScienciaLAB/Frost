@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>SUFeedURL</key>
-	<string>https://sciencialab.github.io/Ice/appcast.xml</string>
+	<string>https://sciencialab.github.io/Frost/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>SPARKLE_PUBLIC_KEY_PLACEHOLDER</string>
 </dict>
