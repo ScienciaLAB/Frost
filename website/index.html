@@ -78,6 +78,10 @@
   }
   .card h3 { margin: 0 0 8px; font-size: 17px; }
   .card ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .card p { margin: 0; }
+  .card pre { margin: 0 0 12px; }
+  .card .note { margin: 0; }
+  h3.subhead { font-size: 20px; margin: 32px 0 8px; }
   ol.steps { padding-left: 22px; }
   ol.steps li { margin-bottom: 14px; }
   code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; }
@@ -107,6 +111,9 @@
     <h1>Frost</h1>
     <p class="tagline">A free, open-source menu bar manager for macOS. Hide, rearrange, and restyle your menu bar items — now working on macOS 26 Tahoe.</p>
     <a class="button" href="https://github.com/ScienciaLAB/Frost/releases/latest/download/Frost.zip">Download Frost</a>
+    <div class="meta">
+      or <code>brew install --cask sciencialab/tap/frost</code>
+    </div>
     <div class="meta">
       Requires macOS 14 or later ·
       <a href="https://github.com/ScienciaLAB/Frost/releases">Release notes</a> ·
@@ -162,8 +169,20 @@
   <section id="install">
     <div class="wrap">
       <h2>Install</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>With Homebrew</h3>
+          <pre><code>brew install --cask sciencialab/tap/frost</code></pre>
+          <p class="note">Upgrade later with <code>brew upgrade --cask frost</code>, or let Frost update itself.</p>
+        </div>
+        <div class="card">
+          <h3>Direct download</h3>
+          <p><a href="https://github.com/ScienciaLAB/Frost/releases/latest/download/Frost.zip">Download Frost.zip</a>, open it, and move <strong>Frost.app</strong> to your Applications folder.</p>
+        </div>
+      </div>
+
+      <h3 class="subhead">First launch</h3>
       <ol class="steps">
-        <li><a href="https://github.com/ScienciaLAB/Frost/releases/latest/download/Frost.zip">Download Frost.zip</a>, open it, and move <strong>Frost.app</strong> to your Applications folder.</li>
         <li>
           Frost isn't notarized by Apple yet, so macOS blocks it the first time. Clear the download flag in Terminal:
           <pre><code>xattr -dr com.apple.quarantine /Applications/Frost.app</code></pre>
