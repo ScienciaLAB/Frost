@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SUFeedURL</key>
+	<string>https://sciencialab.github.io/Frost/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>XuGUtLZt179+RIEAyOq9BuGmVv0uCN+ZZG0W7k2XF9Y=</string>
+</dict>
+</plist>

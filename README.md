@@ -1,39 +1,52 @@
 <div align="center">
-    <img src="Ice/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width=200 height=200>
-    <h1>Ice</h1>
+    <img src="website/icon.png" width=200 height=200>
+    <h1>Frost</h1>
 </div>
 
-Ice is a powerful menu bar management tool. While its primary function is hiding and showing menu bar items, it aims to cover a wide variety of additional features to make it one of the most versatile menu bar tools available.
+Frost is a powerful menu bar manager for macOS. It hides, shows, and rearranges menu bar items, and can restyle the menu bar itself. It works on macOS 26 Tahoe.
 
-![Banner](https://github.com/user-attachments/assets/4423085c-4e4b-4f3d-ad0f-90a217c03470)
+Frost continues [Ice](https://github.com/jordanbaird/Ice) by Jordan Baird, which is no longer maintained. It is built on Ice's unreleased macOS 26 branch plus community fixes that were never merged upstream.
 
-[![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/jordanbaird/Ice/releases/latest)
+[![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/ScienciaLAB/Frost/releases/latest/download/Frost.zip)
 ![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat-square)
 ![Requirements](https://img.shields.io/badge/requirements-macOS%2014%2B-fa4e49?style=flat-square)
-[![Sponsor](https://img.shields.io/badge/Sponsor%20%E2%9D%A4%EF%B8%8F-8A2BE2?style=flat-square)](https://github.com/sponsors/jordanbaird)
-[![Website](https://img.shields.io/badge/Website-015FBA?style=flat-square)](https://icemenubar.app)
-[![License](https://img.shields.io/github/license/jordanbaird/Ice?style=flat-square)](LICENSE)
-
-> [!NOTE]
-> Ice is currently in active development. Some features have not yet been implemented. Download the latest release [here](https://github.com/jordanbaird/Ice/releases/latest) and see the roadmap below for upcoming features.
-
-<a href="https://www.buymeacoffee.com/jordanbaird" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;">
-</a>
+[![Website](https://img.shields.io/badge/Website-015FBA?style=flat-square)](https://sciencialab.github.io/Frost/)
+[![License](https://img.shields.io/github/license/ScienciaLAB/Frost?style=flat-square)](LICENSE)
 
 ## Install
 
-### Manual Installation
+1. Download [Frost.zip](https://github.com/ScienciaLAB/Frost/releases/latest/download/Frost.zip) from the [latest release](https://github.com/ScienciaLAB/Frost/releases/latest) and move `Frost.app` to your `Applications` folder.
+2. Frost isn't notarized by Apple yet, so macOS blocks it the first time. Clear the download flag in Terminal:
 
-Download the "Ice.zip" file from the [latest release](https://github.com/jordanbaird/Ice/releases/latest) and move the unzipped app into your `Applications` folder.
+   ```sh
+   xattr -dr com.apple.quarantine /Applications/Frost.app
+   ```
 
-### Homebrew
+3. Open Frost from Applications or Finder (not by running the binary from Terminal, which gives the permissions to Terminal instead). Grant **Accessibility** and **Screen & System Audio Recording** when asked, then quit and reopen Frost so Screen Recording takes effect.
 
-Install Ice using the following command:
+If Frost says permissions are missing although they look enabled in System Settings, reset them and grant them again:
 
 ```sh
-brew install --cask jordanbaird-ice
+tccutil reset Accessibility com.sciencialab.Frost
+tccutil reset ScreenCapture com.sciencialab.Frost
 ```
+
+Frost updates itself through [Sparkle](https://sparkle-project.org).
+
+## Building from source
+
+Open `Ice.xcodeproj` in Xcode 26 and run the `Ice` scheme, or build an ad-hoc signed `Frost.zip` the same way CI does:
+
+```sh
+Scripts/build.sh
+```
+
+## Releasing
+
+1. Set `MARKETING_VERSION` and increase `CURRENT_PROJECT_VERSION` (the build number Sparkle compares) in the project.
+2. Merge to `main`, then push a matching tag, e.g. `git tag v0.2.0 && git push origin v0.2.0`.
+
+The [Release workflow](.github/workflows/release.yml) builds and signs `Frost.zip`, publishes the GitHub release, adds it to the update feed (`website/appcast.xml`), and redeploys the [website](https://sciencialab.github.io/Frost/). It needs the `SPARKLE_PRIVATE_KEY` repository secret, matching `SUPublicEDKey` in `Ice/Resources/Info.plist`.
 
 ## Features/Roadmap
 
@@ -69,7 +82,7 @@ brew install --cask jordanbaird-ice
 
 - [x] Toggle individual menu bar sections
 - [x] Show the search panel
-- [x] Enable/disable the Ice Bar
+- [x] Enable/disable the Frost Bar
 - [x] Show/hide section divider icons
 - [x] Toggle application menus
 - [ ] Enable/disable auto rehide
@@ -81,15 +94,15 @@ brew install --cask jordanbaird-ice
 - [x] Automatic updates
 - [ ] Menu bar widgets
 
-## Why does Ice only support macOS 14 and later?
+## Why does Frost only support macOS 14 and later?
 
-Ice uses a number of system APIs that are available starting in macOS 14. As such, there are no plans to support earlier versions of macOS.
+Frost uses a number of system APIs that are available starting in macOS 14. As such, there are no plans to support earlier versions of macOS.
 
 ## Gallery
 
 #### Show hidden menu bar items below the menu bar
 
-![Ice Bar](https://github.com/user-attachments/assets/f1429589-6186-4e1b-8aef-592219d49b9b)
+![Frost Bar](https://github.com/user-attachments/assets/f1429589-6186-4e1b-8aef-592219d49b9b)
 
 #### Drag-and-drop interface to arrange menu bar items
 
@@ -107,6 +120,10 @@ Ice uses a number of system APIs that are available starting in macOS 14. As suc
 
 ![Menu Bar Item Spacing](https://github.com/user-attachments/assets/b196aa7e-184a-4d4c-b040-502f4aae40a6)
 
+## Credits
+
+Frost is a fork of [Ice](https://github.com/jordanbaird/Ice), created by Jordan Baird. The macOS 26 support also includes fixes contributed to Ice by its community.
+
 ## License
 
-Ice is available under the [GPL-3.0 license](LICENSE).
+Frost is available under the [GPL-3.0 license](LICENSE).

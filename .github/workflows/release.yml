@@ -1,0 +1,87 @@
+name: Release
+# Push a tag like v0.2.0 (matching MARKETING_VERSION) to publish a release.
+on:
+  push:
+    tags: [ "v*" ]
+permissions:
+  contents: write
+  actions: write
+jobs:
+  release:
+    runs-on: macos-26
+    env:
+      SPARKLE_VERSION: "2.9.6"
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build Frost.app
+        run: Scripts/build.sh
+      - name: Read version
+        id: version
+        run: |
+          plist=build/Build/Products/Release/Frost.app/Contents/Info.plist
+          version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$plist")
+          build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$plist")
+          min_os=$(/usr/libexec/PlistBuddy -c "Print :LSMinimumSystemVersion" "$plist")
+          public_key=$(/usr/libexec/PlistBuddy -c "Print :SUPublicEDKey" "$plist")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match the app version $version (MARKETING_VERSION)"
+            exit 1
+          fi
+          {
+            echo "version=$version"
+            echo "build=$build"
+            echo "min_os=$min_os"
+            echo "public_key=$public_key"
+          } >> "$GITHUB_OUTPUT"
+      - name: Sign update
+        id: sign
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          PUBLIC_KEY: ${{ steps.version.outputs.public_key }}
+        run: |
+          if [ -z "$SPARKLE_PRIVATE_KEY" ]; then
+            echo "::error::The SPARKLE_PRIVATE_KEY repository secret is not set"
+            exit 1
+          fi
+          # A mismatched key pair would ship updates that installed copies
+          # reject, stranding every user on this version. Derive the public
+          # key from the private seed and compare before publishing anything.
+          openssl=/opt/homebrew/opt/openssl@3/bin/openssl
+          [ -x "$openssl" ] || openssl=openssl
+          derived=$( { printf '\x30\x2e\x02\x01\x00\x30\x05\x06\x03\x2b\x65\x70\x04\x22\x04\x20'; echo "$SPARKLE_PRIVATE_KEY" | base64 -d; } \
+            | "$openssl" pkey -inform DER -pubout -outform DER | tail -c 32 | base64)
+          if [ "$derived" != "$PUBLIC_KEY" ]; then
+            echo "::error::SPARKLE_PRIVATE_KEY doesn't match SUPublicEDKey in Info.plist ($PUBLIC_KEY)"
+            exit 1
+          fi
+          mkdir -p sparkle
+          curl -fsSL "https://github.com/sparkle-project/Sparkle/releases/download/$SPARKLE_VERSION/Sparkle-$SPARKLE_VERSION.tar.xz" | tar -xJ -C sparkle
+          signed=$(echo "$SPARKLE_PRIVATE_KEY" | sparkle/bin/sign_update --ed-key-file - Frost.zip)
+          echo "signed=$signed" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub release
+        run: |
+          gh release create "$GITHUB_REF_NAME" Frost.zip \
+            --title "Frost ${{ steps.version.outputs.version }}" \
+            --generate-notes \
+            --verify-tag
+      - name: Add release to the update feed
+        run: |
+          repo_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch origin main
+          git checkout -B main origin/main
+          python3 Scripts/update_appcast.py website/appcast.xml \
+            "${{ steps.version.outputs.version }}" \
+            "${{ steps.version.outputs.build }}" \
+            "${{ steps.version.outputs.min_os }}" \
+            "$repo_url/releases/download/$GITHUB_REF_NAME/Frost.zip" \
+            "$repo_url/releases/tag/$GITHUB_REF_NAME" \
+            '${{ steps.sign.outputs.signed }}'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Add Frost ${{ steps.version.outputs.version }} to the update feed"
+          git push origin main
+      # Pushes made with the workflow token don't trigger other workflows,
+      # but workflow_dispatch does, so start the site deployment explicitly.
+      - name: Deploy website
+        run: gh workflow run pages.yml --ref main

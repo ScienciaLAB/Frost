@@ -1,0 +1,39 @@
+name: Build
+on:
+  push:
+    branches: [ "**" ]
+    paths-ignore:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - "website/**"
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build Frost.app
+        run: Scripts/build.sh
+      - name: Smoke test (launch and stay running)
+        run: |
+          app=build/Build/Products/Release/Frost.app
+          "$app/Contents/MacOS/Frost" > launch.log 2>&1 &
+          pid=$!
+          sleep 15
+          alive=no; kill -0 "$pid" 2>/dev/null && alive=yes
+          echo "--- still running after 15s: $alive"
+          echo "--- stdout/stderr"; cat launch.log
+          echo "--- system log"
+          log show --last 1m --style compact --predicate 'process == "Frost" OR eventMessage CONTAINS[c] "Frost.app"' | tail -60 || true
+          ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i frost && cat ~/Library/Logs/DiagnosticReports/Frost*.ips | head -80 || true
+          kill "$pid" 2>/dev/null || true
+          test "$alive" = yes
+      # Upload Frost.zip as-is. By default GitHub wraps artifacts in another
+      # zip, so downloading would give a zip inside a zip.
+      - uses: actions/upload-artifact@v7
+        with:
+          path: Frost.zip
+          archive: false
